@@ -1,0 +1,46 @@
+# .NET Build
+bin/
+obj/
+out/
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+riderModule.iml
+/_ReSharper.Caches/
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet packages
+packages/
+*.nupkg
+
+# Logs
+*.log
+
+# Coverage / Testes
+coverage/
+TestResults/
+
+# Local database files (caso use desenvolvimento local)
+*.db
+*.sqlite
+*.mdb
+*.ldf
+
+# Publish local
+publish/
+
+# User secrets (evita vazamento de dados sensíveis)
+appsettings.Development.json
+secrets.json
+
+# Sistema operacional
+.DS_Store
+Thumbs.db

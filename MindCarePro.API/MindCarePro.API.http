@@ -1,0 +1,6 @@
+@MindCarePro.API_HostAddress = http://localhost:5241
+
+GET {{MindCarePro.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

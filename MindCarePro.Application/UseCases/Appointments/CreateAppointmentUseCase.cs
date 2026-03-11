@@ -1,8 +1,8 @@
-using AutoMapper;
 using MindCarePro.Application.Dtos.Appointments;
 using MindCarePro.Application.Enums.MindCarePro.Application.Enums;
 using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Appointments;
+using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.Utils;
 using MindCarePro.Domain.Entities.Appointments;
 
@@ -12,28 +12,37 @@ public class CreateAppointmentUseCase
 {
     private readonly IAppointmentRepository _appointmentRepository;
     private readonly IValidationService _validationService;
-    private readonly IMapper _mapper;
+    private readonly ICurrentUser _currentUser;
 
     public CreateAppointmentUseCase(
         IAppointmentRepository appointmentRepository,
         IValidationService validationService,
-        IMapper mapper)
+        ICurrentUser currentUser)
     {
         _appointmentRepository = appointmentRepository;
         _validationService = validationService;
-        _mapper = mapper;
+        _currentUser = currentUser;
     }
 
     public async Task<Appointment> Execute(CreateAppointmentRequest request)
     {
         await _validationService.ValidateAsync(request);
         
-        var (backgroundColor, textColor) =
-            AppointmentColors.GetColors(AppointmentStatus.Schedule);
-        request.Status = AppointmentStatus.Schedule;
-        
-        var appointment = _mapper.Map<Appointment>(request);
-        appointment.UpdateStatus(AppointmentStatus.Schedule, backgroundColor, textColor,"block" );
+        var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
+        var status = AppointmentStatus.Schedule;
+        var (backgroundColor, textColor) = AppointmentColors.GetColors(status);
+
+        var appointment = new Appointment(
+            title: request.Title,
+            start: request.Start!.Value,
+            end: request.End!.Value,
+            status: status,
+            userId: userId,
+            patientId: request.PatientId,
+            backgroundColor: backgroundColor,
+            textColor: textColor,
+            display: "block"
+        );
         
         await _appointmentRepository.Add(appointment);
         return appointment;

@@ -1,5 +1,6 @@
 using FluentValidation;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using MindCarePro.API.Common;
@@ -26,6 +27,7 @@ public class AppointmentsController(
     private readonly IMapper _mapper = mapper;
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateAppointmentRequest request)
     {
         

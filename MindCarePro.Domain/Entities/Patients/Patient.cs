@@ -44,6 +44,13 @@ namespace MindCarePro.Domain.Entities.Patients
 
         // Construtor sem parâmetros para EF Core
         protected Patient() { }
+        
+        
+        public void UpdateUser(Guid userId)
+        {
+            UserId = userId;
+        }
+        
     }
 
 }

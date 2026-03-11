@@ -1,6 +1,7 @@
 using AutoMapper;
 using MindCarePro.Application.Dtos.Patients;
 using MindCarePro.Application.Interfaces;
+using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.UseCases.Patients;
 using MindCarePro.Domain.Entities.Patients;
 using Moq;
@@ -11,6 +12,7 @@ public class CreatePatientUseCaseTests
 {
     private readonly Mock<IPatientRepository> _repositoryMock;
     private readonly Mock<IValidationService> _validationMock;
+    private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IMapper> _mapperMock;
     private readonly CreatePatientUseCase _useCase;
     private readonly Patient _patient;
@@ -34,12 +36,22 @@ public class CreatePatientUseCaseTests
         _mapperMock
             .Setup(m => m.Map<Patient>(It.IsAny<CreatePatientRequest>()))
             .Returns(_patient);
+        
+        _currentUserMock= new Mock<ICurrentUser>();
+        _currentUserMock.SetupGet(c => c.UserId).Returns(_currentUserMock.Object.UserId);
 
         _useCase = new CreatePatientUseCase(
             _repositoryMock.Object,
             _validationMock.Object,
+            _currentUserMock.Object,
             _mapperMock.Object
+     
         );
+    }
+
+    public CreatePatientUseCaseTests(Mock<ICurrentUser> currentUserMock)
+    {
+        _currentUserMock = currentUserMock;
     }
 
     [Fact]

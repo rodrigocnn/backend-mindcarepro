@@ -21,6 +21,7 @@ public class AppointmentRepository(AppDbContext context) : IAppointmentRepositor
     {
         return await _context.Appointments
             .AsNoTracking()
+       
             .ToListAsync();
     }
 

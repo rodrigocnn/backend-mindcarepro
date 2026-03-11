@@ -15,9 +15,10 @@ public class PatientRepository(AppDbContext context) : IPatientRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<Patient>> GetAll()
+    public async Task<IEnumerable<Patient>> GetAll(Guid userId)
     {
         return await _context.Patients
+            .Where(c => c.UserId == userId)
             .AsNoTracking()
             .ToListAsync();
     }

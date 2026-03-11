@@ -8,7 +8,7 @@ public interface IPatientRepository
     
     Task<Patient?> GetById(Guid id);
 
-    Task<IEnumerable<Patient>> GetAll();
+    Task<IEnumerable<Patient>> GetAll(Guid id);
 
     Task Update(Patient patient);
 

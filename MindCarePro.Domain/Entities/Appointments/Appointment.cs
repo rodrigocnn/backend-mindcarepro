@@ -74,6 +74,11 @@ namespace MindCarePro.Domain.Entities.Appointments
             Display = display;
             UpdatedAt = DateTime.UtcNow;
         }
+
+        public void UpdateUser(Guid userId)
+        {
+            UserId = userId;
+        }
     }
 }
 

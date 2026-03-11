@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using MindCarePro.API.Common;
 using MindCarePro.API.Middlewares;
 using MindCarePro.Application.Helpers;
 using MindCarePro.Application.Interfaces;
@@ -34,7 +32,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails(); // Opcional, mas ajuda na padronização
 
-
 // Services
 builder.Services.AddControllers();
 
@@ -46,16 +43,43 @@ builder.Services.AddControllers();
 
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Informe o token JWT no formato: Bearer {seu_token}"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Services.AddAutoMapper(cfg => { }, typeof(PatientProfile));
 
 // Validators
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateAppointmentRequestValidator>();
 
-
-
 // DI
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, MindCarePro.API.Common.CurrentUser>();
 
 builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPsychologistRepository, PsychologistRepository>();
@@ -95,6 +119,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
+        options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -138,5 +163,3 @@ app.UseAuthorization();
 app.MapControllers();
 app.UseHttpsRedirection();
 app.Run();
-
-

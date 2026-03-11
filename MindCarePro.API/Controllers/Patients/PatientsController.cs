@@ -2,6 +2,7 @@
 using FluentValidation;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using MindCarePro.API.Common;
@@ -53,6 +54,7 @@ public class PatientsController(
     }
     
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> All()
     {
         var patients = await _allPatientsUseCase.Execute();
@@ -81,4 +83,3 @@ public class PatientsController(
     }
   
 }
-

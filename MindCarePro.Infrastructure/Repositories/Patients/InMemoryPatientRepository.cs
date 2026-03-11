@@ -19,9 +19,10 @@ public class InMemoryPatientRepository : IPatientRepository
         return Task.FromResult(patient);
     }
 
-    public Task<IEnumerable<Patient>> GetAll()
+    public Task<IEnumerable<Patient>> GetAll(Guid userId)
     {
-        var all = _patients.Where(p => p.DeletedAt == null);
+        var all = _patients
+            .Where(p => p.DeletedAt == null && p.UserId == userId);
         return Task.FromResult(all);
     }
 

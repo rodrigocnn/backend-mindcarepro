@@ -19,9 +19,22 @@ public class InMemoryPsychologistRepository : IPsychologistRepository
         return Task.FromResult(psychologist);
     }
 
+    public Task<Psychologist?> GetById(Guid id, Guid userId)
+    {
+        var psychologist = _psychologists.FirstOrDefault(p =>
+            p.Id == id && p.Id == userId && p.DeletedAt == null);
+        return Task.FromResult(psychologist);
+    }
+
     public Task<IEnumerable<Psychologist>> GetAll()
     {
         var all = _psychologists.Where(p => p.DeletedAt == null);
+        return Task.FromResult(all);
+    }
+
+    public Task<IEnumerable<Psychologist>> GetAll(Guid userId)
+    {
+        var all = _psychologists.Where(p => p.Id == userId && p.DeletedAt == null);
         return Task.FromResult(all);
     }
 

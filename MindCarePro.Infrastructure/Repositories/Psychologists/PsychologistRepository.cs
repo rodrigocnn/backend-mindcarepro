@@ -24,11 +24,26 @@ public class PsychologistRepository(AppDbContext context) : IPsychologistReposit
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Psychologist>> GetAll(Guid userId)
+    {
+        return await _context.Psychologists
+            .Where(p => p.Id == userId)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<Psychologist?> GetById(Guid id)
     {
         return await _context.Psychologists
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task<Psychologist?> GetById(Guid id, Guid userId)
+    {
+        return await _context.Psychologists
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id && c.Id == userId);
     }
 
     public async Task Update(Psychologist psychologist)

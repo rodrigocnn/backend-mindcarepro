@@ -30,6 +30,13 @@ public class PatientRepository(AppDbContext context) : IPatientRepository
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
+    public async Task<Patient?> GetById(Guid id, Guid userId)
+    {
+        return await _context.Patients
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
+    }
+
     public async Task Update(Patient category)
     {
         _context.Patients.Update(category);

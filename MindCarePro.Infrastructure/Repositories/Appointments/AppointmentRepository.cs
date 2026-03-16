@@ -21,16 +21,29 @@ public class AppointmentRepository(AppDbContext context) : IAppointmentRepositor
     {
         return await _context.Appointments
             .AsNoTracking()
-       
             .ToListAsync();
     }
 
-    
+    public async Task<IEnumerable<Appointment>> GetAll(Guid userId)
+    {
+        return await _context.Appointments
+            .Where(a => a.UserId == userId)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<Appointment?> GetById(Guid id)
     {
         return await _context.Appointments
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
+    }
+
+    public async Task<Appointment?> GetById(Guid id, Guid userId)
+    {
+        return await _context.Appointments
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
     }
 
     public async Task Update(Appointment appointment)

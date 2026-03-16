@@ -11,10 +11,10 @@ public class AppointmentProfile:Profile
     {
         
         CreateMap<Appointment, AppointmentResponse>();
+        CreateMap<UpdateAppointmentRequest, Appointment>();
 
     }
 }
-
 
 
 

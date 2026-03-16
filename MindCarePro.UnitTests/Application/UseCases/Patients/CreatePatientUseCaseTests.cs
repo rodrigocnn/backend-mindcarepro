@@ -38,7 +38,7 @@ public class CreatePatientUseCaseTests
             .Returns(_patient);
         
         _currentUserMock= new Mock<ICurrentUser>();
-        _currentUserMock.SetupGet(c => c.UserId).Returns(_currentUserMock.Object.UserId);
+        _currentUserMock.SetupGet(c => c.UserId).Returns(Guid.NewGuid());
 
         _useCase = new CreatePatientUseCase(
             _repositoryMock.Object,

@@ -1,27 +1,36 @@
-using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Appointments;
+using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Domain.Entities.Appointments;
+using MindCarePro.Domain.Shared;
 
 
 namespace MindCarePro.Application.UseCases.Appointments;
 
 
-public class DeleteAppointmentUseCase(IAppointmentRepository appointmentRepository)
+public class DeleteAppointmentUseCase(
+    IAppointmentRepository appointmentRepository,
+    ICurrentUser currentUser)
 {
     private readonly  IAppointmentRepository _appointmentRepository = appointmentRepository;
+    private readonly ICurrentUser _currentUser = currentUser;
 
-    public async Task<Appointment> Execute(Guid id)
+    public async Task<Result<Appointment>> Execute(Guid id)
     {
+        if (_currentUser.UserId is null)
+        {
+            return Result<Appointment>.Failure(ResultErrorType.Unauthorized, "Acesso não autorizado");
+        }
 
-        var appointment = await _appointmentRepository.GetById(id);
+        var userId = _currentUser.UserId.Value;
+        var appointment = await _appointmentRepository.GetById(id, userId);
         if (appointment == null)
         {
-            throw new Exception($"Appointment with id {id} not found."); // ou NotFoundException
+            return Result<Appointment>.Failure(ResultErrorType.NotFound, "Agendamento não encontrado");
         }
         
-        await _appointmentRepository.Delete(DateTime.UtcNow);
+        appointment.Delete(DateTime.UtcNow);
         await _appointmentRepository.Update(appointment);
 
-        return appointment;
+        return Result<Appointment>.Success(appointment);
     }
 }

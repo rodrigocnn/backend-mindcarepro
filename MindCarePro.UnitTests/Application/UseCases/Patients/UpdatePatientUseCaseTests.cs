@@ -1,6 +1,7 @@
 using AutoMapper;
 using MindCarePro.Application.Dtos.Patients;
 using MindCarePro.Application.Interfaces;
+using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.UseCases.Patients;
 using MindCarePro.Domain.Entities.Patients;
 using Moq;
@@ -10,6 +11,8 @@ namespace MindCarePro.UnitTests.Application.UseCases.Patients;
 public class UpdatePatientUseCaseTests
 {
     private readonly Mock<IPatientRepository> _repositoryMock;
+    private readonly Mock<IValidationService> _validationMock;
+    private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IMapper> _mapperMock;
     private readonly UpdatePatientUseCase _useCase;
     private readonly Patient _patient;
@@ -23,6 +26,14 @@ public class UpdatePatientUseCaseTests
             .Setup(r => r.Update(It.IsAny<Patient>()))
             .Returns(Task.CompletedTask);
 
+        _validationMock = new Mock<IValidationService>();
+        _validationMock
+            .Setup(v => v.ValidateAsync(It.IsAny<CreatePatientRequest>()))
+            .Returns(Task.CompletedTask);
+
+        _currentUserMock = new Mock<ICurrentUser>();
+        _currentUserMock.SetupGet(c => c.UserId).Returns(Guid.NewGuid());
+
         _mapperMock = new Mock<IMapper>();
         _mapperMock
             .Setup(m => m.Map<Patient>(It.IsAny<CreatePatientRequest>()))
@@ -30,6 +41,8 @@ public class UpdatePatientUseCaseTests
 
         _useCase = new UpdatePatientUseCase(
             _repositoryMock.Object,
+            _validationMock.Object,
+            _currentUserMock.Object,
             _mapperMock.Object
         );
     }
@@ -40,6 +53,8 @@ public class UpdatePatientUseCaseTests
         // Arrange
         Guid patientId = Guid.NewGuid();
         _patient.Id = patientId;
+        var userId = _currentUserMock.Object.UserId!.Value;
+        _patient.UpdateUser(userId);
 
         var request = new CreatePatientRequest(
             _patient.Name + " Updated",
@@ -69,7 +84,7 @@ public class UpdatePatientUseCaseTests
 
         // 1. Setup para encontrar o paciente no repositório
         _repositoryMock
-            .Setup(r => r.GetById(patientId))
+            .Setup(r => r.GetById(patientId, userId))
             .ReturnsAsync(_patient);
 
         // 2. Setup para o mapeamento de ATUALIZAÇÃO (Request -> Entidade Existente)
@@ -91,7 +106,8 @@ public class UpdatePatientUseCaseTests
         Assert.Equal(patientId, result.Id);
         Assert.Equal(request.Name, result.Name);
         
-        _repositoryMock.Verify(r => r.GetById(patientId), Times.Once);
+        _validationMock.Verify(v => v.ValidateAsync(request), Times.Once);
+        _repositoryMock.Verify(r => r.GetById(patientId, userId), Times.Once);
         _mapperMock.Verify(m => m.Map(request, _patient), Times.Once);
         _repositoryMock.Verify(r => r.Update(It.Is<Patient>(p => p.Id == patientId)), Times.Once);
     }

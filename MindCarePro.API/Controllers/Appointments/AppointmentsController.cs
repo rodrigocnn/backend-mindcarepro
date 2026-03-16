@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using MindCarePro.API.Common;
 using MindCarePro.Application.Dtos.Appointments;
 using MindCarePro.Application.UseCases.Appointments;
+using MindCarePro.Domain.Shared;
 using ValidationException = FluentValidation.ValidationException;
 
 namespace MindCarePro.API.Controllers.Appointments;
@@ -30,33 +31,64 @@ public class AppointmentsController(
     [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateAppointmentRequest request)
     {
-        
-        var appointment = await _createAppointmentUseCase.Execute(request);
-        var appointmentResponse = _mapper.Map<AppointmentResponse>(appointment);
+        var result = await _createAppointmentUseCase.Execute(request);
+        if (result.IsFailure)
+        {
+            return ResultFailure<AppointmentResponse>(result);
+        }
+
+        var appointmentResponse = _mapper.Map<AppointmentResponse>(result.Value!);
         return Ok(new ApiResponse<AppointmentResponse>(appointmentResponse));
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> All()
     {
-        var appointments = await _allAppointmentsUseCase.Execute();
-        var appointmentResponses = _mapper.Map<IEnumerable<AppointmentResponse>>(appointments);
+        var result = await _allAppointmentsUseCase.Execute();
+        if (result.IsFailure)
+        {
+            return ResultFailure<IEnumerable<AppointmentResponse>>(result);
+        }
+
+        var appointmentResponses = _mapper.Map<IEnumerable<AppointmentResponse>>(result.Value!);
         return Ok(new ApiResponse<IEnumerable<AppointmentResponse>>(appointmentResponses));
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAppointmentUseCase request)
+    [Authorize]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateAppointmentRequest request)
     {
-        var appointment = await _updateAppointmentUseCase.Execute(id, request);
-        var appointmentResponse = _mapper.Map<AppointmentResponse>(appointment);
+        var result = await _updateAppointmentUseCase.Execute(id, request);
+        if (result.IsFailure)
+        {
+            return ResultFailure<AppointmentResponse>(result);
+        }
+
+        var appointmentResponse = _mapper.Map<AppointmentResponse>(result.Value!);
         return Ok(new ApiResponse<AppointmentResponse>(appointmentResponse));
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var appointment = await _deleteAppointmentUseCase.Execute(id);
-        var appointmentResponse = _mapper.Map<AppointmentResponse>(appointment);
+        var result = await _deleteAppointmentUseCase.Execute(id);
+        if (result.IsFailure)
+        {
+            return ResultFailure<AppointmentResponse>(result);
+        }
+
+        var appointmentResponse = _mapper.Map<AppointmentResponse>(result.Value!);
         return Ok(new ApiResponse<AppointmentResponse>(appointmentResponse));
+    }
+
+    private IActionResult ResultFailure<T>(Result result)
+    {
+        return StatusCode(ResultStatusCodeHelper.ToStatusCode(result.ErrorType), new ApiResponse<T?>(
+            data: default,
+            notifications: result.Errors,
+            success: false
+        ));
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using MindCarePro.API.Common;
 using MindCarePro.Application.Dtos.Patients;
 using MindCarePro.Application.UseCases.Patients;
+using MindCarePro.Domain.Shared;
 using ValidationException = FluentValidation.ValidationException;
 
 namespace MindCarePro.API.Controllers.Patients;
@@ -31,25 +32,16 @@ public class PatientsController(
     [HttpPost]
     public async Task<IActionResult> Create(CreatePatientRequest request)
     {
-        try
+      
+        var result = await _createPatientUseCase.Execute(request);
+        if (result.IsFailure)
         {
-            var patient = await _createPatientUseCase.Execute(request);
-            var patientResponse = _mapper.Map<PatientResponse>(patient);
-            return Ok(new ApiResponse<PatientResponse>(patientResponse));
+            return ResultFailure<PatientResponse>(result);
         }
-        catch (ValidationException e)
-        {
-         
-            var errors = e.Errors.Select(x => x.ErrorMessage);
-
-            var response = new ApiResponse<object>(
-                data: null,
-                notifications: errors,
-                success: false
-            );
-
-            return BadRequest(response);
-        }
+        
+        var patientResponse = _mapper.Map<PatientResponse>(result.Value);
+        
+        return Ok(new ApiResponse<PatientResponse>(patientResponse));
         
     }
     
@@ -64,7 +56,7 @@ public class PatientsController(
     }
     
     [HttpPut("{id:guid}")]
- 
+    [Authorize]
     public async Task<IActionResult> Update( Guid id, [FromBody] CreatePatientRequest request)
     {
         var patient = await _updatePatientUseCase.Execute(id, request);
@@ -74,12 +66,21 @@ public class PatientsController(
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
        var patient = await _deletePatientUseCase.Execute(id);
        var patientResponse = _mapper.Map<PatientResponse>(patient);
         
        return Ok(new ApiResponse<PatientResponse>(patientResponse));
+    }
+    private IActionResult ResultFailure<T>(Result result)
+    {
+        return StatusCode(ResultStatusCodeHelper.ToStatusCode(result.ErrorType), new ApiResponse<T?>(
+            data: default,
+            notifications: result.Errors,
+            success: false
+        ));
     }
   
 }

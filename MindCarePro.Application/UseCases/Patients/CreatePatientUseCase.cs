@@ -3,6 +3,7 @@ using MindCarePro.Application.Dtos.Patients;
 using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Domain.Entities.Patients;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Patients;
 
@@ -17,17 +18,22 @@ public class CreatePatientUseCase(
     private readonly IValidationService _validationService = validationService;
     private readonly ICurrentUser _currentUser = currentUser;
 
-    public async Task<Patient> Execute(CreatePatientRequest request)
+    public async Task<Result<Patient>> Execute(CreatePatientRequest request)
     {
         await _validationService.ValidateAsync(request);
         
-        var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
+        var userId = _currentUser.UserId ?? null;
 
+        if (userId == null)
+        {
+            return Result<Patient>.Failure(ResultErrorType.Unauthorized, "Acesso não autorizado");
+        }
+     
         var patient = _mapper.Map<Patient>(request);
-        patient.UpdateUser(userId);
+        patient.UpdateUser(userId.Value);
         await _patientRepository.Add(patient);
-
-        return patient;
+        return  Result<Patient>.Success(patient);
+       
     }
 }
 

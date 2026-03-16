@@ -1,4 +1,5 @@
 using MindCarePro.Application.Dtos.Auth;
+using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Security;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.Interfaces.Users;
@@ -7,20 +8,26 @@ namespace MindCarePro.Application.UseCases.Users;
 
 public class LoginUserUseCase(
         IUserRepository userRepository,
+        IValidationService validationService,
         IPasswordEncripter passwordEncripter, 
         ITokenService tokenService
     )
 {
     private readonly IUserRepository _userRepository = userRepository;
+    private readonly IValidationService _validationService = validationService;
     private readonly IPasswordEncripter _passwordEncripter = passwordEncripter;
     private readonly ITokenService _tokenService = tokenService;
 
     public async Task<LoginResponse> Execute(string email, string password)
     {
+        await _validationService.ValidateAsync(new LoginRequest
+        {
+            Email = email,
+            Password = password
+        });
+
         var user = await _userRepository.GetByEmailAsync(email);
         
- 
-
         if (user is null)
             throw new Exception("Usuário ou senha inválidos");
 

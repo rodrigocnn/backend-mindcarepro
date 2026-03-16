@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MindCarePro.API.Common;
 using MindCarePro.Application.Dtos.Psychologists;
@@ -26,29 +27,14 @@ public class PsychologistsController(
     [HttpPost]
     public async Task<IActionResult> Create(CreatePsychologistRequest request)
     {
-
-        try
-        {
-            var psychologist = await _createPsychologistUseCase.Execute(request);
-            var response = _mapper.Map<PsychologistResponse>(psychologist);
-            return Ok(new ApiResponse<PsychologistResponse>(response));
-        }
-        catch (ValidationException e)
-        {
-            var errors = e.Errors.Select(x => x.ErrorMessage);
-
-            var response = new ApiResponse<object>(
-                data: null,
-                notifications: errors,
-                success: false
-            );
-
-            return BadRequest(response);
-        }
-       
+        
+        var psychologist = await _createPsychologistUseCase.Execute(request);
+        var response = _mapper.Map<PsychologistResponse>(psychologist);
+        return Ok(new ApiResponse<PsychologistResponse>(response));
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> All()
     {
         var psychologists = await _allPsychologistsUseCase.Execute();
@@ -57,6 +43,7 @@ public class PsychologistsController(
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePsychologistRequest request)
     {
         var psychologist = await _updatePsychologistUseCase.Execute(id, request);
@@ -65,6 +52,7 @@ public class PsychologistsController(
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
         var psychologist = await _deletePsychologistUseCase.Execute(id);

@@ -1,4 +1,5 @@
 using MindCarePro.Application.Interfaces.Psycholgists;
+using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.UseCases.Psychologists;
 using MindCarePro.Domain.Entities.Psychologists;
 using Moq;
@@ -17,17 +18,20 @@ public class AllPsychologistsUseCaseTests
         };
         
         var repositoryMock = new Mock<IPsychologistRepository>();
+        var currentUserMock = new Mock<ICurrentUser>();
+        currentUserMock.SetupGet(c => c.UserId).Returns(psychologists[0].Id);
+
         repositoryMock
-            .Setup(repo => repo.GetAll())
-            .ReturnsAsync(psychologists);
+            .Setup(repo => repo.GetAll(psychologists[0].Id))
+            .ReturnsAsync(new[] { psychologists[0] });
         
-        var useCase = new AllPsychologistsUseCase(repositoryMock.Object);
+        var useCase = new AllPsychologistsUseCase(repositoryMock.Object, currentUserMock.Object);
         var result = await useCase.Execute();
         
         Assert.NotNull(result);
         var enumerable = result as Psychologist[] ?? result.ToArray();
-        Assert.Equal(2, enumerable.Count());
+        Assert.Single(enumerable);
     
-        repositoryMock.Verify(r => r.GetAll(), Times.Once);
+        repositoryMock.Verify(r => r.GetAll(psychologists[0].Id), Times.Once);
     }
 }

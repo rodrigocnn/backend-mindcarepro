@@ -5,6 +5,7 @@ using MindCarePro.Application.Interfaces.Appointments;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.Utils;
 using MindCarePro.Domain.Entities.Appointments;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Appointments;
 
@@ -23,12 +24,17 @@ public class CreateAppointmentUseCase
         _validationService = validationService;
         _currentUser = currentUser;
     }
-
-    public async Task<Appointment> Execute(CreateAppointmentRequest request)
+ 
+    public async Task<Result<Appointment>>   Execute(CreateAppointmentRequest request)
     {
         await _validationService.ValidateAsync(request);
+
+        if (_currentUser.UserId is null)
+        {
+            return Result<Appointment>.Failure(ResultErrorType.Unauthorized, "Acesso não autorizado");
+        }
         
-        var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
+        var userId = _currentUser.UserId.Value;
         var status = AppointmentStatus.Schedule;
         var (backgroundColor, textColor) = AppointmentColors.GetColors(status);
 
@@ -45,6 +51,7 @@ public class CreateAppointmentUseCase
         );
         
         await _appointmentRepository.Add(appointment);
-        return appointment;
+        return Result<Appointment>.Success(appointment);
+   
     }
 }

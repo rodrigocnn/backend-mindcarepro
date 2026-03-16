@@ -7,6 +7,7 @@ public interface IPatientRepository
     Task Add(Patient patient);
     
     Task<Patient?> GetById(Guid id);
+    Task<Patient?> GetById(Guid id, Guid userId);
 
     Task<IEnumerable<Patient>> GetAll(Guid id);
 
@@ -14,4 +15,3 @@ public interface IPatientRepository
 
     Task Delete(Guid id);
 }
-

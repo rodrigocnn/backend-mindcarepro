@@ -51,7 +51,9 @@ public class DeletePatientUseCaseTests
         var result = await _useCase.Execute(_patient.Id);
         
         Assert.NotNull(result);
-        Assert.Equal(patientId, result.Id);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(patientId, result.Value!.Id);
         
         _repositoryMock.Verify(r => r.GetById(patientId, userId), Times.Once);
     }

@@ -30,8 +30,10 @@ public class AllPatientsUseCaseTests
         var result = await useCase.Execute();
         
         Assert.NotNull(result);
-        var enumerable = result as Patient[] ?? result.ToArray();
-        Assert.Equal(2, enumerable.Count());
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        var enumerable = result.Value as Patient[] ?? result.Value!.ToArray();
+        Assert.Equal(2, enumerable.Length);
     
         repositoryMock.Verify(r => r.GetAll(userId), Times.Once);
     }

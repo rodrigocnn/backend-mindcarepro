@@ -73,8 +73,10 @@ public class CreatePatientUseCaseTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(_patient.Name, result.Name);
-        Assert.Equal(_patient.Cpf, result.Cpf);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(_patient.Name, result.Value!.Name);
+        Assert.Equal(_patient.Cpf, result.Value!.Cpf);
 
         _validationMock.Verify(v => v.ValidateAsync(request), Times.Once);
         _mapperMock.Verify(m => m.Map<Patient>(request), Times.Once);

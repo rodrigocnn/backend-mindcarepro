@@ -67,21 +67,6 @@ public class UpdatePatientUseCaseTests
             _patient.Gender
         );
 
-        // Instanciando o Response conforme o construtor da sua classe
-        var expectedResponse = new PatientResponse(
-            id: patientId,
-            name: request.Name,
-            email: request.Email,
-            cpf: request.Cpf,
-            phone: request.Phone,
-            birthDate: request.BirthDate,
-            notes: request.Notes,
-            rg: request.Rg,
-            gender: request.Gender,
-            createdAt: DateTime.Now.AddDays(-1),
-            updatedAt: DateTime.Now
-        );
-
         // 1. Setup para encontrar o paciente no repositório
         _repositoryMock
             .Setup(r => r.GetById(patientId, userId))
@@ -93,18 +78,15 @@ public class UpdatePatientUseCaseTests
             .Setup(m => m.Map(request, _patient))
             .Returns(_patient);
 
-        // 3. Setup para o mapeamento de RETORNO (Entidade -> PatientResponse)
-        _mapperMock
-            .Setup(m => m.Map<PatientResponse>(_patient))
-            .Returns(expectedResponse);
-
         // Act
         var result = await _useCase.Execute(patientId, request);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(patientId, result.Id);
-        Assert.Equal(request.Name, result.Name);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(patientId, result.Value!.Id);
+        Assert.Equal(request.Name, result.Value!.Name);
         
         _validationMock.Verify(v => v.ValidateAsync(request), Times.Once);
         _repositoryMock.Verify(r => r.GetById(patientId, userId), Times.Once);

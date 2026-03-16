@@ -40,7 +40,6 @@ public class PatientsController(
         }
         
         var patientResponse = _mapper.Map<PatientResponse>(result.Value);
-        
         return Ok(new ApiResponse<PatientResponse>(patientResponse));
         
     }
@@ -56,7 +55,6 @@ public class PatientsController(
         }
 
         var patientResponses = _mapper.Map<IEnumerable<PatientResponse>>(result.Value!);
-        
         return Ok(new ApiResponse<IEnumerable<PatientResponse>>(patientResponses));
     }
     
@@ -71,7 +69,6 @@ public class PatientsController(
         }
 
         var patientResponse = _mapper.Map<PatientResponse>(result.Value!);
-        
         return Ok(new ApiResponse<PatientResponse>(patientResponse));
     }
 
@@ -86,7 +83,6 @@ public class PatientsController(
        }
 
        var patientResponse = _mapper.Map<PatientResponse>(result.Value!);
-        
        return Ok(new ApiResponse<PatientResponse>(patientResponse));
     }
     private IActionResult ResultFailure<T>(Result result)

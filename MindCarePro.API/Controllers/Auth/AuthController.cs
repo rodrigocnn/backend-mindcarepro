@@ -1,6 +1,6 @@
 using MindCarePro.API.Common;
 using MindCarePro.Application.Dtos.Auth;
-using MindCarePro.Application.Dtos.Patients;
+using MindCarePro.Domain.Shared;
 using MindCarePro.Application.UseCases.Users;
 
 namespace MindCarePro.API.Controllers.Auth;
@@ -19,23 +19,21 @@ public class AuthController(
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        try
+        var result = await _loginUserUseCase.Execute(request.Email, request.Password);
+        if (result.IsFailure)
         {
-            var token = await _loginUserUseCase
-                .Execute(request.Email, request.Password);
-
-            return Ok(new { token });
+            return ResultFailure<LoginResponse>(result);
         }
-        catch (Exception e)
-        {
-            var response = new ApiResponse<object>(
-                data: null,
-                notifications: [e.Message],
-                success: false
-            );
 
-            return BadRequest(response);
-        }
-     
+        return Ok(new ApiResponse<LoginResponse>(result.Value!));
+    }
+
+    private IActionResult ResultFailure<T>(Result result)
+    {
+        return StatusCode(ResultStatusCodeHelper.ToStatusCode(result.ErrorType), new ApiResponse<T?>(
+            data: default,
+            notifications: result.Errors,
+            success: false
+        ));
     }
 }

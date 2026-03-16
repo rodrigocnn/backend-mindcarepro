@@ -3,6 +3,7 @@ using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Security;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.Interfaces.Users;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Users;
 
@@ -18,7 +19,7 @@ public class LoginUserUseCase(
     private readonly IPasswordEncripter _passwordEncripter = passwordEncripter;
     private readonly ITokenService _tokenService = tokenService;
 
-    public async Task<LoginResponse> Execute(string email, string password)
+    public async Task<Result<LoginResponse>> Execute(string email, string password)
     {
         await _validationService.ValidateAsync(new LoginRequest
         {
@@ -29,13 +30,13 @@ public class LoginUserUseCase(
         var user = await _userRepository.GetByEmailAsync(email);
         
         if (user is null)
-            throw new Exception("Usuário ou senha inválidos");
+            return Result<LoginResponse>.Failure(ResultErrorType.Unauthorized, "Usuário ou senha inválidos");
 
         var valid = _passwordEncripter.Verify(password, user.Password);
         
         
         if (!valid)
-            throw new Exception("Usuário ou senha inválidos");
+            return Result<LoginResponse>.Failure(ResultErrorType.Unauthorized, "Usuário ou senha inválidos");
 
         var tokenResult= _tokenService.GenerateToken(user.Id, user.Email);
 
@@ -43,6 +44,6 @@ public class LoginUserUseCase(
         var role = user.GetType().Name;
         var expiration = tokenResult.Expiration.ToString("yyyy-MM-dd HH:mm:ss");
             
-        return new LoginResponse( user.Id, user.Email, role, tokenResult.Token, expiration);
+        return Result<LoginResponse>.Success(new LoginResponse(user.Id, user.Email, role, tokenResult.Token, expiration));
     }
 }

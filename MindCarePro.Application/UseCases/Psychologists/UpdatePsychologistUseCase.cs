@@ -4,6 +4,8 @@ using MindCarePro.Application.Dtos.Psychologists;
 using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Psycholgists;
 using MindCarePro.Application.Interfaces.Shared;
+using MindCarePro.Domain.Entities.Psychologists;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Psychologists;
 
@@ -18,20 +20,26 @@ public class UpdatePsychologistUseCase(
     private readonly ICurrentUser _currentUser = currentUser;
     private readonly IMapper _mapper = mapper;
     
-    public async Task<PsychologistResponse> Execute(Guid id, UpdatePsychologistRequest request)
+    public async Task<Result<Psychologist>> Execute(Guid id, UpdatePsychologistRequest request)
     {
         await _validationService.ValidateAsync(request);
-        var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
-
-        var patient = await  _psychologistRepository.GetById(id, userId);
-        if (patient == null)
+        if (_currentUser.UserId is null)
         {
-            throw new UnauthorizedAccessException();
+            return Result<Psychologist>.Failure(ResultErrorType.Unauthorized, "Acesso não autorizado");
         }
-        var patientMapped = _mapper.Map(request, patient);
-        await  _psychologistRepository.Update(patientMapped);
-        
-        return _mapper.Map<PsychologistResponse>(patientMapped);
+
+        var userId = _currentUser.UserId.Value;
+
+        var psychologist = await _psychologistRepository.GetById(id, userId);
+        if (psychologist == null)
+        {
+            return Result<Psychologist>.Failure(ResultErrorType.NotFound, "Psicólogo não encontrado");
+        }
+
+        var psychologistMapped = _mapper.Map(request, psychologist);
+        await _psychologistRepository.Update(psychologistMapped);
+
+        return Result<Psychologist>.Success(psychologistMapped);
     }
 
 }

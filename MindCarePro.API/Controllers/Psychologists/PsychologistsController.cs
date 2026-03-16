@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MindCarePro.API.Common;
 using MindCarePro.Application.Dtos.Psychologists;
 using MindCarePro.Application.UseCases.Psychologists;
+using MindCarePro.Domain.Shared;
 using ValidationException = FluentValidation.ValidationException;
 
 namespace MindCarePro.API.Controllers.Psychologists;
@@ -28,8 +29,13 @@ public class PsychologistsController(
     public async Task<IActionResult> Create(CreatePsychologistRequest request)
     {
         
-        var psychologist = await _createPsychologistUseCase.Execute(request);
-        var response = _mapper.Map<PsychologistResponse>(psychologist);
+        var result = await _createPsychologistUseCase.Execute(request);
+        if (result.IsFailure)
+        {
+            return ResultFailure<PsychologistResponse>(result);
+        }
+
+        var response = _mapper.Map<PsychologistResponse>(result.Value!);
         return Ok(new ApiResponse<PsychologistResponse>(response));
     }
 
@@ -37,8 +43,13 @@ public class PsychologistsController(
     [Authorize]
     public async Task<IActionResult> All()
     {
-        var psychologists = await _allPsychologistsUseCase.Execute();
-        var response = _mapper.Map<IEnumerable<PsychologistResponse>>(psychologists);
+        var result = await _allPsychologistsUseCase.Execute();
+        if (result.IsFailure)
+        {
+            return ResultFailure<IEnumerable<PsychologistResponse>>(result);
+        }
+
+        var response = _mapper.Map<IEnumerable<PsychologistResponse>>(result.Value!);
         return Ok(new ApiResponse<IEnumerable<PsychologistResponse>>(response));
     }
 
@@ -46,8 +57,13 @@ public class PsychologistsController(
     [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePsychologistRequest request)
     {
-        var psychologist = await _updatePsychologistUseCase.Execute(id, request);
-        var response = _mapper.Map<PsychologistResponse>(psychologist);
+        var result = await _updatePsychologistUseCase.Execute(id, request);
+        if (result.IsFailure)
+        {
+            return ResultFailure<PsychologistResponse>(result);
+        }
+
+        var response = _mapper.Map<PsychologistResponse>(result.Value!);
         return Ok(new ApiResponse<PsychologistResponse>(response));
     }
 
@@ -55,8 +71,22 @@ public class PsychologistsController(
     [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var psychologist = await _deletePsychologistUseCase.Execute(id);
-        var response = _mapper.Map<PsychologistResponse>(psychologist);
+        var result = await _deletePsychologistUseCase.Execute(id);
+        if (result.IsFailure)
+        {
+            return ResultFailure<PsychologistResponse>(result);
+        }
+
+        var response = _mapper.Map<PsychologistResponse>(result.Value!);
         return Ok(new ApiResponse<PsychologistResponse>(response));
+    }
+
+    private IActionResult ResultFailure<T>(Result result)
+    {
+        return StatusCode(ResultStatusCodeHelper.ToStatusCode(result.ErrorType), new ApiResponse<T?>(
+            data: default,
+            notifications: result.Errors,
+            success: false
+        ));
     }
 }

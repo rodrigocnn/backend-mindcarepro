@@ -4,6 +4,7 @@ using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Psycholgists;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Domain.Entities.Psychologists;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Psychologists;
 
@@ -18,13 +19,13 @@ public class CreatePsychologistUseCase(
     private readonly IValidationService _validationService = validationService;
     private readonly IPasswordEncripter _passwordEncripter =  passwordEncripter;
 
-    public async Task<Psychologist> Execute(CreatePsychologistRequest request)
+    public async Task<Result<Psychologist>> Execute(CreatePsychologistRequest request)
     {
         await _validationService.ValidateAsync(request);
         var psychologist = _mapper.Map<Psychologist>(request);
         psychologist.Password = _passwordEncripter.Encrypt(psychologist.Password);
         
         await  _psychologistRepository.Add(psychologist);
-        return psychologist;
+        return Result<Psychologist>.Success(psychologist);
     }
 }

@@ -1,6 +1,7 @@
 using MindCarePro.Application.Interfaces.Psycholgists;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Domain.Entities.Psychologists;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Psychologists;
 
@@ -11,10 +12,16 @@ public class AllPsychologistsUseCase(
     private readonly IPsychologistRepository _psychologistRepository =  psychologistRepository;
     private readonly ICurrentUser _currentUser = currentUser;
     
-    public async Task<IEnumerable<Psychologist>>Execute()
+    public async Task<Result<IEnumerable<Psychologist>>> Execute()
     {
-        var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
-        return await _psychologistRepository.GetAll(userId);
+        if (_currentUser.UserId is null)
+        {
+            return Result<IEnumerable<Psychologist>>.Failure(ResultErrorType.Unauthorized, "Acesso não autorizado");
+        }
+
+        var userId = _currentUser.UserId.Value;
+        var psychologists = await _psychologistRepository.GetAll(userId);
+        return Result<IEnumerable<Psychologist>>.Success(psychologists);
     }
 
 }

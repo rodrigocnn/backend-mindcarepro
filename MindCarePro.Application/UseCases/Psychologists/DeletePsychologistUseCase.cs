@@ -1,6 +1,7 @@
 using MindCarePro.Application.Interfaces.Psycholgists;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Domain.Entities.Psychologists;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Psychologists;
 
@@ -11,19 +12,24 @@ public class DeletePsychologistUseCase(
     private readonly IPsychologistRepository _psychologistRepository= psychologistRepository;
     private readonly ICurrentUser _currentUser = currentUser;
 
-    public async Task<Psychologist> Execute(Guid id)
+    public async Task<Result<Psychologist>> Execute(Guid id)
     {
-        var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
+        if (_currentUser.UserId is null)
+        {
+            return Result<Psychologist>.Failure(ResultErrorType.Unauthorized, "Acesso não autorizado");
+        }
+
+        var userId = _currentUser.UserId.Value;
 
         var psychologist = await _psychologistRepository.GetById(id, userId);
         if ( psychologist== null)
         {
-            throw new UnauthorizedAccessException();
+            return Result<Psychologist>.Failure(ResultErrorType.NotFound, "Psicólogo não encontrado");
         }
         
         psychologist.DeletedAt = DateTime.UtcNow;
         await _psychologistRepository.Update( psychologist);
 
-        return psychologist;
+        return Result<Psychologist>.Success(psychologist);
     }
 }

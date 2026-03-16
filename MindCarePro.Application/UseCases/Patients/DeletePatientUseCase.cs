@@ -1,6 +1,7 @@
 using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Domain.Entities.Patients;
+using MindCarePro.Domain.Shared;
 
 namespace MindCarePro.Application.UseCases.Patients;
 
@@ -11,20 +12,25 @@ public class DeletePatientUseCase(
     private readonly IPatientRepository _patientRepository = patientRepository;
     private readonly ICurrentUser _currentUser = currentUser;
 
-    public async Task<Patient> Execute(Guid id)
+    public async Task<Result<Patient>> Execute(Guid id)
     {
 
-        var userId = _currentUser.UserId ?? throw new UnauthorizedAccessException();
+        if (_currentUser.UserId is null)
+        {
+            return Result<Patient>.Failure(ResultErrorType.Unauthorized, "Acesso não autorizado");
+        }
+
+        var userId = _currentUser.UserId.Value;
 
         var patient = await _patientRepository.GetById(id, userId);
         if (patient == null)
         {
-            throw new UnauthorizedAccessException();
+            return Result<Patient>.Failure(ResultErrorType.NotFound, "Paciente não encontrado");
         }
         
         patient.DeletedAt = DateTime.UtcNow;
         await _patientRepository.Update(patient);
 
-        return patient;
+        return Result<Patient>.Success(patient);
     }
 }

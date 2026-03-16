@@ -49,8 +49,13 @@ public class PatientsController(
     [Authorize]
     public async Task<IActionResult> All()
     {
-        var patients = await _allPatientsUseCase.Execute();
-        var patientResponses = _mapper.Map<IEnumerable<PatientResponse>>(patients);
+        var result = await _allPatientsUseCase.Execute();
+        if (result.IsFailure)
+        {
+            return ResultFailure<IEnumerable<PatientResponse>>(result);
+        }
+
+        var patientResponses = _mapper.Map<IEnumerable<PatientResponse>>(result.Value!);
         
         return Ok(new ApiResponse<IEnumerable<PatientResponse>>(patientResponses));
     }
@@ -59,8 +64,13 @@ public class PatientsController(
     [Authorize]
     public async Task<IActionResult> Update( Guid id, [FromBody] CreatePatientRequest request)
     {
-        var patient = await _updatePatientUseCase.Execute(id, request);
-        var patientResponse = _mapper.Map<PatientResponse>(patient);
+        var result = await _updatePatientUseCase.Execute(id, request);
+        if (result.IsFailure)
+        {
+            return ResultFailure<PatientResponse>(result);
+        }
+
+        var patientResponse = _mapper.Map<PatientResponse>(result.Value!);
         
         return Ok(new ApiResponse<PatientResponse>(patientResponse));
     }
@@ -69,8 +79,13 @@ public class PatientsController(
     [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
-       var patient = await _deletePatientUseCase.Execute(id);
-       var patientResponse = _mapper.Map<PatientResponse>(patient);
+       var result = await _deletePatientUseCase.Execute(id);
+       if (result.IsFailure)
+       {
+           return ResultFailure<PatientResponse>(result);
+       }
+
+       var patientResponse = _mapper.Map<PatientResponse>(result.Value!);
         
        return Ok(new ApiResponse<PatientResponse>(patientResponse));
     }

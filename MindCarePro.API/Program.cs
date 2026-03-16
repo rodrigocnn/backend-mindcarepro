@@ -35,6 +35,16 @@ builder.Services.AddProblemDetails(); // Opcional, mas ajuda na padronização
 // Services
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevCors", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 /*builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -93,6 +103,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 // Casos de uso (UseCases) devem ser registrados para DI
 builder.Services.AddScoped<CreatePatientUseCase>();
 builder.Services.AddScoped<AllPatientsUseCase>();
+builder.Services.AddScoped<ShowPatientUseCase>();
 builder.Services.AddScoped<UpdatePatientUseCase>();
 builder.Services.AddScoped<DeletePatientUseCase>();
 
@@ -154,6 +165,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("DevCors");
 }
 
 app.UseAuthentication();

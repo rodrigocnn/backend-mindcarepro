@@ -18,12 +18,14 @@ namespace MindCarePro.API.Controllers.Patients;
 public class PatientsController(
     CreatePatientUseCase createPatientUseCase, 
     AllPatientsUseCase allPatientsUseCase,
+    ShowPatientUseCase showPatientUseCase,
     UpdatePatientUseCase updatePatientUseCase,
     DeletePatientUseCase  deletePatientUseCase,
     IMapper mapper): ControllerBase
 {
     private readonly CreatePatientUseCase _createPatientUseCase = createPatientUseCase;
     private readonly AllPatientsUseCase _allPatientsUseCase = allPatientsUseCase;
+    private readonly ShowPatientUseCase _showPatientUseCase = showPatientUseCase;
     private readonly UpdatePatientUseCase _updatePatientUseCase = updatePatientUseCase;
     private readonly DeletePatientUseCase _deletePatientUseCase = deletePatientUseCase;
     private readonly IMapper _mapper = mapper;
@@ -43,6 +45,22 @@ public class PatientsController(
         return Ok(new ApiResponse<PatientResponse>(patientResponse));
         
     }
+    
+    [HttpGet("{id:guid}")]
+    [Authorize]
+    public async Task<IActionResult> Show(Guid id)
+    {
+        var result = await _showPatientUseCase.Execute(id);
+        if (result.IsFailure)
+        {
+            return ResultFailure<PatientResponse>(result);
+        }
+
+        var patientResponse = _mapper.Map<PatientResponse>(result.Value!);
+        return Ok(new ApiResponse<PatientResponse>(patientResponse));
+    }
+    
+    
     
     [HttpGet]
     [Authorize]

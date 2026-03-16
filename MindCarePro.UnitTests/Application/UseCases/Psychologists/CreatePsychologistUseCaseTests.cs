@@ -69,9 +69,11 @@ public class CreatePsychologistUseCaseTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(_psychologist.Name, result.Name);
-        Assert.Equal(_psychologist.Cpf, result.Cpf);
-        Assert.Equal(_psychologist.Crp, result.Crp);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(_psychologist.Name, result.Value!.Name);
+        Assert.Equal(_psychologist.Cpf, result.Value!.Cpf);
+        Assert.Equal(_psychologist.Crp, result.Value!.Crp);
 
         _validationMock.Verify(v => v.ValidateAsync(request), Times.Once);
         _mapperMock.Verify(m => m.Map<Psychologist>(request), Times.Once);

@@ -29,7 +29,9 @@ public class AllPsychologistsUseCaseTests
         var result = await useCase.Execute();
         
         Assert.NotNull(result);
-        var enumerable = result as Psychologist[] ?? result.ToArray();
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        var enumerable = result.Value as Psychologist[] ?? result.Value!.ToArray();
         Assert.Single(enumerable);
     
         repositoryMock.Verify(r => r.GetAll(psychologists[0].Id), Times.Once);

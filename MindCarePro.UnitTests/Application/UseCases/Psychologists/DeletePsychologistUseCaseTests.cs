@@ -50,7 +50,9 @@ public class DeletePsychologistUseCaseTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(psychologistId, result.Id);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(psychologistId, result.Value!.Id);
 
         _repositoryMock.Verify(r => r.GetById(psychologistId, userId), Times.Once);
         _repositoryMock.Verify(r => r.Update(It.Is<Psychologist>(p => p.Id == psychologistId)), Times.Once);

@@ -64,20 +64,6 @@ public class UpdatePsychologistUseCaseTests
             crp: _psychologist.Crp
         );
 
-        var expectedResponse = new PsychologistResponse(
-            id: psychologistId,
-            name: request.Name,
-            birth: request.BirthDate,
-            email: request.Email,
-            cpf: request.Cpf,
-            rg: request.Rg,
-            phone: request.Phone,
-            crp: request.Crp,
-            createdAt: _psychologist.CreatedAt,
-            updatedAt: DateTime.Now,
-            deletedAt: null
-        );
-
         // 1️⃣ Buscar entidade existente
         _repositoryMock
             .Setup(r => r.GetById(psychologistId, userId))
@@ -88,19 +74,16 @@ public class UpdatePsychologistUseCaseTests
             .Setup(m => m.Map(request, _psychologist))
             .Returns(_psychologist);
 
-        // 3️⃣ Mapear entidade → response
-        _mapperMock
-            .Setup(m => m.Map<PsychologistResponse>(_psychologist))
-            .Returns(expectedResponse);
-
         // Act
         var result = await _useCase.Execute(psychologistId, request);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(psychologistId, result.Id);
-        Assert.Equal(request.Name, result.Name);
-        Assert.Equal(request.Crp, result.Crp);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Value);
+        Assert.Equal(psychologistId, result.Value!.Id);
+        Assert.Equal(request.Name, result.Value!.Name);
+        Assert.Equal(request.Crp, result.Value!.Crp);
 
         _validationMock.Verify(v => v.ValidateAsync(request), Times.Once);
         _repositoryMock.Verify(r => r.GetById(psychologistId, userId), Times.Once);

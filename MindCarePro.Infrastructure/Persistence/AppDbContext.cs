@@ -3,6 +3,7 @@ using MindCarePro.Domain.Entities.Appointments;
 using MindCarePro.Domain.Entities.Assistant;
 using MindCarePro.Domain.Entities.Patients;
 using MindCarePro.Domain.Entities.Psychologists;
+using MindCarePro.Domain.Entities.Sessions;
 using MindCarePro.Domain.Entities.Users;
 
 namespace MindCarePro.Infrastructure.Persistence;
@@ -13,6 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Psychologist> Psychologists=> Set<Psychologist>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
+
+    public DbSet<Session> Sessions => Set<Session>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +34,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasOne(a => a.Patient)
             .WithMany() 
             .HasForeignKey(a => a.PatientId)
+            .IsRequired();
+
+        modelBuilder.Entity<Session>()
+            .HasOne(s => s.User)
+            .WithMany()
+            .HasForeignKey(s => s.UserId)
+            .IsRequired();
+
+        modelBuilder.Entity<Session>()
+            .HasOne(s => s.Patient)
+            .WithMany()
+            .HasForeignKey(s => s.PatientId)
             .IsRequired();
         
         modelBuilder.Entity<Patient>()

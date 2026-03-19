@@ -18,7 +18,7 @@ public class PatientRepository(AppDbContext context) : IPatientRepository
     public async Task<IEnumerable<Patient>> GetAll(Guid userId)
     {
         return await _context.Patients
-            .Where(c => c.UserId == userId)
+            .Where(c => c.UserId == userId && c.DeletedAt == null)
             .AsNoTracking()
             .ToListAsync();
     }

@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-
+using MindCarePro.Application.Enums;
 using MindCarePro.Application.Interfaces.Appointments;
 using MindCarePro.Domain.Entities.Appointments;
-using MindCarePro.Domain.Entities.Patients;
 using MindCarePro.Infrastructure.Persistence;
 
 namespace MindCarePro.Infrastructure.Repositories.Appointments;
@@ -30,6 +29,18 @@ public class AppointmentRepository(AppDbContext context) : IAppointmentRepositor
             .Where(a => a.UserId == userId)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<bool> HasOverlap(Guid userId, DateTime startDate, DateTime endDate, Guid? excludeAppointmentId = null)
+    {
+        return await _context.Appointments
+            .AsNoTracking()
+            .AnyAsync(a =>
+                a.UserId == userId &&
+                a.Status != AppointmentStatus.Canceled &&
+                a.Start < endDate &&
+                a.End > startDate &&
+                (excludeAppointmentId == null || a.Id != excludeAppointmentId));
     }
 
     public async Task<Appointment?> GetById(Guid id)

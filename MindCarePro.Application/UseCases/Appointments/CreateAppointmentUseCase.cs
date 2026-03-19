@@ -1,5 +1,5 @@
 using MindCarePro.Application.Dtos.Appointments;
-using MindCarePro.Application.Enums.MindCarePro.Application.Enums;
+using MindCarePro.Application.Enums;
 using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Appointments;
 using MindCarePro.Application.Interfaces.Shared;
@@ -35,13 +35,20 @@ public class CreateAppointmentUseCase
         }
         
         var userId = _currentUser.UserId.Value;
+        var hasOverlap = await _appointmentRepository.HasOverlap(userId, request.Start, request.End);
+        
+        if (hasOverlap )
+        {
+            return Result<Appointment>.Failure(ResultErrorType.Conflict, "Já existe agendamento para esse horario");
+        }
+        
         var status = AppointmentStatus.Schedule;
         var (backgroundColor, textColor) = AppointmentColors.GetColors(status);
 
         var appointment = new Appointment(
-            title: request.Title,
-            start: request.Start!.Value,
-            end: request.End!.Value,
+            title: _currentUser.Name,
+            start: request.Start,
+            end: request.End,
             status: status,
             userId: userId,
             patientId: request.PatientId,

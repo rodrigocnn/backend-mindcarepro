@@ -26,7 +26,7 @@ namespace MindCarePro.Domain.Entities.Appointments
 
         // Construtor principal
         public Appointment(
-            string title,
+            string? title,
             DateTime start,
             DateTime end,
             string status,
@@ -63,7 +63,7 @@ namespace MindCarePro.Domain.Entities.Appointments
             Status = status;
             if (backgroundColor != null) BackgroundColor = backgroundColor;
             if (textColor != null) TextColor = textColor;
-            Display = display;
+            if (display != null) Display = display;
             UpdatedAt = DateTime.UtcNow;
         }
         
@@ -79,8 +79,38 @@ namespace MindCarePro.Domain.Entities.Appointments
         {
             UserId = userId;
         }
+        
+        private bool CheckCanChangeStatusToCanceled()
+        {
+            return Status != "CANCELED" && Status != "COMPLETED";
+        }
+        
+        private bool CheckCanChangeStatusToConfirmed()
+        {
+            return Status != "CANCELED" && Status != "COMPLETED" && Status != "CONFIRMED";
+        }
+        
+        private bool CheckCanChangeStatusToComplet()
+        {
+            return Status != "CANCELED" && Status != "COMPLETED" && Status != "SCHEDULED";
+        }
+
+        private bool CheckCanChangeStatusToRescheduled()
+        {
+            return Status != "CANCELED" && Status != "COMPLETED";
+        }
+   
+   
+        public bool CanChangeStatusTo(string statusRequest)
+        {
+            return statusRequest switch
+            {
+                "CANCELED" => CheckCanChangeStatusToCanceled(),
+                "CONFIRMED" => CheckCanChangeStatusToConfirmed(),
+                "COMPLETED" => CheckCanChangeStatusToComplet(),
+                "RESCHEDULED" => CheckCanChangeStatusToRescheduled(),
+                _ => true
+            };
+        }
     }
 }
-
-
-

@@ -7,9 +7,7 @@ public class CreateAppointmentRequestValidator : AbstractValidator<CreateAppoint
 {
     public CreateAppointmentRequestValidator()
     {
-        RuleFor(x => x.Title)
-            .NotEmpty().WithMessage("O título é obrigatório.")
-            .MaximumLength(150).WithMessage("O título deve ter no máximo 150 caracteres.");
+      
 
         RuleFor(x => x.Start)
             .NotNull().WithMessage("A data de início é obrigatória.")

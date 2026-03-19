@@ -7,9 +7,9 @@ public class UpdateAppointmentRequestValidator : AbstractValidator<UpdateAppoint
 {
     public UpdateAppointmentRequestValidator()
     {
-        RuleFor(x => x.Title)
-            .NotEmpty().WithMessage("O título é obrigatório.")
-            .MaximumLength(150).WithMessage("O título deve ter no máximo 150 caracteres.");
+        RuleFor(x => x.Status)
+            .NotEmpty().WithMessage("O status é obrigatório.")
+            .MaximumLength(150).WithMessage("O status deve ter no máximo 150 caracteres.");
 
         RuleFor(x => x.Start)
             .NotNull().WithMessage("A data de início é obrigatória.")

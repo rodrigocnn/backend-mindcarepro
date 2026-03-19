@@ -14,5 +14,7 @@ public interface IAppointmentRepository
 
     Task Update(Appointment appointment);
 
+    Task<bool> HasOverlap(Guid userId, DateTime startDate, DateTime endDate, Guid? excludeAppointmentId = null);
+
     Task Delete(DateTime id);
 }

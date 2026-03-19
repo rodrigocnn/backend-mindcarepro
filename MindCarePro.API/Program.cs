@@ -7,21 +7,28 @@ using MindCarePro.API.Middlewares;
 using MindCarePro.Application.Helpers;
 using MindCarePro.Application.Interfaces;
 using MindCarePro.Application.Interfaces.Appointments;
+using MindCarePro.Application.Interfaces.Dashboards;
 using MindCarePro.Application.Interfaces.Psycholgists;
+using MindCarePro.Application.Interfaces.Sessions;
 using MindCarePro.Application.Interfaces.Security;
 using MindCarePro.Application.Interfaces.Shared;
 using MindCarePro.Application.Interfaces.Users;
 using MindCarePro.Application.Mappers.Patients;
 using MindCarePro.Application.UseCases.Appointments;
+using MindCarePro.Application.UseCases.Dashboards;
 using MindCarePro.Application.UseCases.Patients;
 using MindCarePro.Application.UseCases.Psychologists;
+using MindCarePro.Application.UseCases.Sessions;
 using MindCarePro.Application.UseCases.Users;
 using MindCarePro.Application.Validators.Appointments;
 using MindCarePro.Application.Validators.Patients;
+using MindCarePro.Application.Validators.Sessions;
 using MindCarePro.Infrastructure.Persistence;
 using MindCarePro.Infrastructure.Repositories.Appointments;
+using MindCarePro.Infrastructure.Repositories.Dashboards;
 using MindCarePro.Infrastructure.Repositories.Patients;
 using MindCarePro.Infrastructure.Repositories.Psychologists;
+using MindCarePro.Infrastructure.Repositories.Sessions;
 using MindCarePro.Infrastructure.Repositories.Users;
 using MindCarePro.Infrastructure.Security;
 
@@ -85,6 +92,8 @@ builder.Services.AddAutoMapper(cfg => { }, typeof(PatientProfile));
 // Validators
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateAppointmentRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateSessionRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UpdateSessionRequestValidator>();
 
 // DI
 
@@ -95,6 +104,8 @@ builder.Services.AddScoped<IPatientRepository, PatientRepository>();
 builder.Services.AddScoped<IPsychologistRepository, PsychologistRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
 builder.Services.AddScoped<IPasswordEncripter, PasswordEncripter>();
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -119,6 +130,14 @@ builder.Services.AddScoped<CreateAppointmentUseCase>();
 builder.Services.AddScoped<AllAppointmentsUseCase>();
 builder.Services.AddScoped<UpdateAppointmentUseCase>();
 builder.Services.AddScoped<DeleteAppointmentUseCase>();
+
+builder.Services.AddScoped<AllSessionsUseCase>();
+builder.Services.AddScoped<CreateSessionUseCase>();
+builder.Services.AddScoped<AllSessionsByPatientUseCase>();
+builder.Services.AddScoped<ShowSessionUseCase>();
+builder.Services.AddScoped<UpdateSessionUseCase>();
+builder.Services.AddScoped<AttendedPatientUseCase>();
+builder.Services.AddScoped<GetDashboardUseCase>();
 
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");

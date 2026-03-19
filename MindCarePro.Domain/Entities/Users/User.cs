@@ -25,4 +25,8 @@ public class User(
     public string Rg { get; private set; } = rg;
     public string Password { get;  set; } = password;
     public string Phone { get; private set; } = phone;
+
+    // One user can have many patients.
+    public ICollection<MindCarePro.Domain.Entities.Patients.Patient> Patients { get; private set; }
+        = new List<MindCarePro.Domain.Entities.Patients.Patient>();
 }

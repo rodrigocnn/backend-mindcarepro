@@ -24,4 +24,9 @@ public sealed class CurrentUser : ICurrentUser
 
     public string? Email =>
         _httpContextAccessor.HttpContext?.User?.FindFirstValue("email");
+
+    public string? Name =>
+        _httpContextAccessor.HttpContext?.User?.FindFirstValue("name");
+
+    
 }

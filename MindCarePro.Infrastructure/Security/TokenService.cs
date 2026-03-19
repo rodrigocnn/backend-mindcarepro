@@ -20,7 +20,7 @@ public class TokenService : ITokenService
     }
 
    
-    public TokenResult GenerateToken(Guid userId, string email)
+    public TokenResult GenerateToken(Guid userId, string email, string name)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
 
@@ -37,6 +37,7 @@ public class TokenService : ITokenService
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, email),
+            new Claim(JwtRegisteredClaimNames.Name, name),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

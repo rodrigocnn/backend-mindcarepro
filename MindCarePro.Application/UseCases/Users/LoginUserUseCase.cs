@@ -38,12 +38,13 @@ public class LoginUserUseCase(
         if (!valid)
             return Result<LoginResponse>.Failure(ResultErrorType.Unauthorized, "Usuário ou senha inválidos");
 
-        var tokenResult= _tokenService.GenerateToken(user.Id, user.Email);
+        var tokenResult= _tokenService.GenerateToken(user.Id, user.Email, user.Name);
 
         // Tipo do usuário baseado na herança
         var role = user.GetType().Name;
+ 
         var expiration = tokenResult.Expiration.ToString("yyyy-MM-dd HH:mm:ss");
             
-        return Result<LoginResponse>.Success(new LoginResponse(user.Id, user.Email, role, tokenResult.Token, expiration));
+        return Result<LoginResponse>.Success(new LoginResponse(user.Id,  user.Email,user.Name,  role, tokenResult.Token, expiration));
     }
 }
